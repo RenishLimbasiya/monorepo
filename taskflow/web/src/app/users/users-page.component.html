@@ -1,0 +1,62 @@
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Taskflow home"><span class="brand-mark">T</span> taskflow</a>
+    @if (user(); as currentUser) {
+      <div class="topbar-user"><span class="avatar">{{ (currentUser.name || currentUser.email).charAt(0).toUpperCase() }}</span><span>{{ currentUser.name || currentUser.email }}</span><button class="text-button" type="button" (click)="logout()">Sign out</button></div>
+    }
+  </header>
+
+  <section class="content">
+    @if (error()) { <div class="alert" role="alert">{{ error() }}</div> }
+
+    @if (!user()) {
+      <div class="auth-card">
+        <div class="eyebrow">YOUR WORKSPACE</div>
+        <h1>{{ mode() === 'login' ? 'Welcome back' : 'Create your account' }}</h1>
+        <p class="muted">{{ mode() === 'login' ? 'Sign in to manage your Taskflow account.' : 'Get started with your Taskflow account.' }}</p>
+        <div class="tabs" role="tablist" aria-label="Authentication options">
+          <button type="button" role="tab" [attr.aria-selected]="mode() === 'login'" [class.active]="mode() === 'login'" (click)="setMode('login')">Sign in</button>
+          <button type="button" role="tab" [attr.aria-selected]="mode() === 'register'" [class.active]="mode() === 'register'" (click)="setMode('register')">Create account</button>
+        </div>
+        <form (ngSubmit)="submitAuth()">
+          @if (mode() === 'register') {
+            <label for="name">Name <span class="optional">(optional)</span></label>
+            <input id="name" name="name" [(ngModel)]="name" maxlength="100" autocomplete="name" placeholder="Your name" />
+          }
+          <label for="email">Email</label>
+          <input id="email" name="email" [(ngModel)]="email" type="email" required maxlength="320" autocomplete="email" placeholder="you@example.com" />
+          <label for="password">Password</label>
+          <input id="password" name="password" [(ngModel)]="password" type="password" required minlength="12" autocomplete="{{ mode() === 'login' ? 'current-password' : 'new-password' }}" placeholder="At least 12 characters" />
+          @if (mode() === 'register') { <p class="hint">Use at least 12 characters.</p> }
+          <button class="primary full" type="submit" [disabled]="loading()">{{ loading() ? 'Please wait…' : mode() === 'login' ? 'Sign in' : 'Create account' }}</button>
+        </form>
+      </div>
+    } @else {
+      <div class="heading-row"><div><div class="eyebrow">ACCOUNT</div><h1>Your profile</h1><p class="muted">View and manage your account details.</p></div></div>
+      @if (loading()) { <div class="loading" role="status">Loading your account…</div> }
+      @if (editing()) {
+        <section class="panel">
+          <div class="panel-heading"><div><h2>Edit account</h2><p class="muted">Changes take effect as soon as you save.</p></div></div>
+          <form class="edit-form" (ngSubmit)="saveUser()">
+            <label for="edit-name">Name</label><input id="edit-name" name="editName" [(ngModel)]="editName" maxlength="100" autocomplete="name" />
+            <label for="edit-email">Email</label><input id="edit-email" name="editEmail" [(ngModel)]="editEmail" type="email" required maxlength="320" autocomplete="email" />
+            <label for="edit-password">New password <span class="optional">(leave blank to keep current)</span></label><input id="edit-password" name="editPassword" [(ngModel)]="editPassword" type="password" minlength="12" autocomplete="new-password" placeholder="At least 12 characters" />
+            <div class="form-actions"><button class="secondary" type="button" (click)="editing.set(false)">Cancel</button><button class="primary" type="submit" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save changes' }}</button></div>
+          </form>
+        </section>
+      } @else {
+        <section class="panel">
+          <div class="panel-heading"><div><h2>Account details</h2><p class="muted">Your personal information and account metadata.</p></div><button class="secondary" type="button" (click)="beginEdit()">Edit profile</button></div>
+          <div class="profile-table" role="table" aria-label="Your account details">
+            <div class="profile-row" role="row"><span class="field-label" role="rowheader">Name</span><span role="cell">{{ user()?.name || '—' }}</span></div>
+            <div class="profile-row" role="row"><span class="field-label" role="rowheader">Email</span><span role="cell">{{ user()?.email }}</span></div>
+            <div class="profile-row" role="row"><span class="field-label" role="rowheader">User ID</span><span class="id-value" role="cell">{{ user()?.id }}</span></div>
+            <div class="profile-row" role="row"><span class="field-label" role="rowheader">Joined</span><span role="cell">{{ user()?.createdAt | date:'mediumDate' }}</span></div>
+          </div>
+        </section>
+        <section class="danger-panel"><div><h2>Delete account</h2><p class="muted">Permanently remove your account and sign out.</p></div><button class="danger" type="button" (click)="deleteUser()" [disabled]="saving()">Delete account</button></section>
+      }
+    }
+  </section>
+  <footer>Taskflow <span>·</span> Account management</footer>
+</main>
