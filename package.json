@@ -1,0 +1,23 @@
+{
+  "name": "taskflow-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "taskflow/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k \"npm run dev -w @taskflow/api\" \"npm run start -w @taskflow/web\"",
+    "dev:api": "npm run dev -w @taskflow/api",
+    "dev:web": "npm run start -w @taskflow/web",
+    "build": "npm run build -w @taskflow/api && npm run build -w @taskflow/web",
+    "dev:build_api": "npm run build -w @taskflow/api",
+    "dev:build_web": "npm run build -w @taskflow/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"  
+  },
+  "dependencies": {
+    "@taskflow/web": "^0.0.0"
+  }
+}
